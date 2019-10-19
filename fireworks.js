@@ -2,6 +2,8 @@ let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
 document.getElementById('button').style.backgroundColor = "red";
 
+//change
+
 // stats
 let height = window.innerHeight;
 let width = window.innerWidth;
