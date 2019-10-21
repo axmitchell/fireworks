@@ -19,6 +19,7 @@ ctx.fillRect(0,0,canvas.width,canvas.height);
 let maxSize = 25
 let path = 1
 let explosionsLimit = 6
+let length = 6
 
 //set random values for each firework
 let x = Math.floor(Math.random()*canvas.width)
@@ -37,7 +38,7 @@ function drawFirework(fx,fy,fs,color) {
 //create fireworks
 function explode() {
     setTimeout(function(){
-        if (path < size*6) {
+        if (path < size*length) {
             drawFirework(x,y-size,size, getRandomColor()); //draw center
             drawFirework(x+(size/4),y-path-(2*size),size/2, getRandomColor()); //draw top path
             drawFirework(x+path+(size*1.25),y-path-(size*1.75),size/2,getRandomColor()); //draw top-right path
@@ -79,7 +80,7 @@ function fadeFireworks() {
     let oldX = pastExplosion[0]
     let oldY = pastExplosion[1]
     let oldSize = pastExplosion[2]
-        if (path < oldSize*6) {
+        if (path < oldSize*length) {
             drawFirework(oldX,oldY-oldSize,oldSize, 'darkblue'); //draw center
             drawFirework(oldX+(oldSize/4),oldY-path-(2*oldSize),oldSize/2,'darkblue'); //draw top path
             drawFirework(oldX+path+(oldSize*1.25),oldY-path-(oldSize*1.75),oldSize/2,'darkblue'); //draw top-right path
