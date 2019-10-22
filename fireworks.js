@@ -1,4 +1,4 @@
-//set trigger to spacebar
+//set execution to spacebar
 document.body.onkeyup = function(e){
     if (e.keyCode == 32){
         explode()
@@ -12,10 +12,12 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight
 
 //create sky
-ctx.fillStyle = "darkblue";
+let sky = 'darkblue'
+ctx.fillStyle = sky;
 ctx.fillRect(0,0,canvas.width,canvas.height); 
 
 //set firework parameters
+let minSize = 5
 let maxSize = 25
 let path = 1
 let explosionsLimit = 6
@@ -24,51 +26,73 @@ let length = 6
 //set random values for each firework
 let x = Math.floor(Math.random()*canvas.width)
 let y = Math.floor(Math.random()*canvas.height)
-let size = Math.floor(Math.random()*maxSize)
+let size = Math.floor(Math.random()*(maxSize-minSize)+minSize)
 
 //create array to hold fireworks' values
 let pastExplosions = []
 
 //create firework pixels
 function drawFirework(fx,fy,fs,color) {
-    ctx.fillStyle = color;
-    ctx.fillRect(fx,fy,fs,fs)
+        ctx.fillStyle = color;
+        ctx.fillRect(fx,fy,fs,fs)
+}
+
+//create
+function drawFireworks(ffx,ffy,ffs,fcolor){
+    drawFirework(ffx,ffy-ffs,ffs, fcolor); //draw center
+    drawFirework(ffx+(ffs/4),ffy-path-(2*ffs),ffs/2, fcolor); //draw top path
+    drawFirework(ffx+path+(ffs*1.25),ffy-path-(ffs*1.75),ffs/2,fcolor); //draw top-right path
+    drawFirework(ffx+path+(ffs*1.5),ffy-(3*ffs/4),ffs/2,fcolor); //draw right path
+    drawFirework(ffx+path+(ffs*1.25),ffy+path+(ffs/4),ffs/2,fcolor); //draw bottom-right path
+    drawFirework(ffx+(ffs/4),ffy+path+(ffs/2),ffs/2,fcolor); //draw down path
+    drawFirework(ffx-path-(3*ffs/4),ffy+path+(ffs/4),ffs/2,fcolor);  //draw bottom-left path
+    drawFirework(ffx-path-ffs,ffy-(3*ffs/4),ffs/2,fcolor); //draw left path
+    drawFirework(ffx-path-(3*ffs/4),ffy-path-(ffs*1.75),ffs/2,fcolor); //draw top-left path 
 }
 
 //create fireworks
 function explode() {
+
+    //control time between iterations below
     setTimeout(function(){
+        
+        //draw pixels across incrementing positions
         if (path < size*length) {
-            drawFirework(x,y-size,size, getRandomColor()); //draw center
-            drawFirework(x+(size/4),y-path-(2*size),size/2, getRandomColor()); //draw top path
-            drawFirework(x+path+(size*1.25),y-path-(size*1.75),size/2,getRandomColor()); //draw top-right path
-            drawFirework(x+path+(size*1.5),y-(3*size/4),size/2,getRandomColor()); //draw right path
-            drawFirework(x+path+(size*1.25),y+path+(size/4),size/2,getRandomColor()); //draw bottom-right path
-            drawFirework(x+(size/4),y+path+(size/2),size/2,getRandomColor()); //draw down path
-            drawFirework(x-path-(3*size/4),y+path+(size/4),size/2,getRandomColor());  //draw bottom-left path
-            drawFirework(x-path-size,y-(3*size/4),size/2,getRandomColor()); //draw left path
-            drawFirework(x-path-(3*size/4),y-path-(size*1.75),size/2,getRandomColor()); //draw top-left path 
+            drawFireworks(x,y,size,getRandomColor())
             
             //add firework's values to array
             pastExplosions.push([x,y,size])   
             
+            //increment positions
             path += size;
+
             explode()
         }
+
+        //control number of fireworks for every execution
         else if (explosionsLimit>1) {
+            
             //reset values
             path = 1
             x = Math.floor(Math.random()*canvas.width)
             y = Math.floor(Math.random()*canvas.height)
-            size = Math.floor(Math.random()*maxSize)
+            size = Math.floor(Math.random()*(maxSize-minSize)+minSize)
             
             console.log(pastExplosions[pastExplosions.length-1])
+
             explosionsLimit--
+
             explode(); 
             fadeFireworks()
         }  
         else {
+            //reset values
+            path = 1
+            x = Math.floor(Math.random()*canvas.width)
+            y = Math.floor(Math.random()*canvas.height)
+            size = Math.floor(Math.random()*(maxSize-minSize)+minSize)
             explosionsLimit = 6
+
             fadeFireworks()
         }
     }, 150);
@@ -80,31 +104,22 @@ function fadeFireworks() {
     let oldX = pastExplosion[0]
     let oldY = pastExplosion[1]
     let oldSize = pastExplosion[2]
-        if (path < oldSize*length) {
-            drawFirework(oldX,oldY-oldSize,oldSize, 'darkblue'); //draw center
-            drawFirework(oldX+(oldSize/4),oldY-path-(2*oldSize),oldSize/2,'darkblue'); //draw top path
-            drawFirework(oldX+path+(oldSize*1.25),oldY-path-(oldSize*1.75),oldSize/2,'darkblue'); //draw top-right path
-            drawFirework(oldX+path+(oldSize*1.5),oldY-(3*oldSize/4),oldSize/2,'darkblue'); //draw right path
-            drawFirework(oldX+path+(oldSize*1.25),oldY+path+(oldSize/4),oldSize/2,'darkblue'); //draw bottom-right path
-            drawFirework(oldX+(oldSize/4),oldY+path+(oldSize/2),oldSize/2,'darkblue'); //draw bottom path
-            drawFirework(oldX-path-(3*oldSize/4),oldY+path+(oldSize/4),oldSize/2,'darkblue'); //draw bottom-left path
-            drawFirework(oldX-path-oldSize,oldY-(3*oldSize/4),oldSize/2,'darkblue'); //draw left path
-            drawFirework(oldX-path-(3*oldSize/4),oldY-path-(oldSize*1.75),oldSize/2,'darkblue'); //draw top-left path     
-            path += oldSize;            
-            fadeFireworks();
-        }
-        else{    
-            //reset values
-            path = 1
-            oldX = pastExplosion[0]
-            oldY = pastExplosion[1]
-            oldSize = pastExplosion[2]
-            
-            //remove first item from array
-            pastExplosions.shift()
-            
-            fadeFireworks();
-        }
+        
+    if (path < oldSize*length) {
+        drawFireworks(oldX, oldY, oldSize,sky)  
+        path += oldSize;            
+        fadeFireworks();
+    }
+    else{    
+        //reset values
+        path = 1
+        
+        //remove first item from array
+        pastExplosions.shift()
+        
+        fadeFireworks();
+        
+    }
 }
 
 //return random color
