@@ -1,133 +1,94 @@
-//set execution to spacebar
 document.body.onkeyup = function(e){
     if (e.keyCode == 32){
-        explode()
+        createFireworks()
     }
-};
+}
 
-//create canvas
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight
 
-//create sky
-let sky = 'darkblue'
+let sky = '#2F69C6';
 ctx.fillStyle = sky;
 ctx.fillRect(0,0,canvas.width,canvas.height); 
 
-//set firework parameters
 let minSize = 5
 let maxSize = 25
 let path = 1
 let explosionsLimit = 6
-let length = 6
-
-//set random values for each firework
-let x = Math.floor(Math.random()*canvas.width)
-let y = Math.floor(Math.random()*canvas.height)
-let size = Math.floor(Math.random()*(maxSize-minSize)+minSize)
-
-//create array to hold fireworks' values
+let length = 8
+let rateOfExpansion = 120
+let colors = ['#87fab3', '#fa87ce', '#fab387', '#faed87', '#fa8795', '#cefa87', '#87faed', '#8795fa', '#87cefa'];
+let randomX = Math.floor(Math.random()*canvas.width)
+let randomY = Math.floor(Math.random()*canvas.height)
+let randomSize = Math.floor(Math.random()*(maxSize-minSize)+minSize)
 let pastExplosions = []
 
-//create firework pixels
-function drawFirework(fx,fy,fs,color) {
-        ctx.fillStyle = color;
-        ctx.fillRect(fx,fy,fs,fs)
+function getRandomColor() {return colors[Math.floor(Math.random()*(colors.length-1))]}
+
+function designFireworkPixel(selX,selY,selSize,selColor) {
+        ctx.fillStyle = selColor;
+        ctx.fillRect(selX,selY,selSize,selSize)
+}
+function designFirework(selX,selY,selSize,selColor){
+    let center = designFireworkPixel(selX,selY,selSize,selColor);
+    let topPath = designFireworkPixel(selX+(selSize/4),selY-path-selSize,selSize/2,selColor);
+    let topRightPath = designFireworkPixel(selX+path+(selSize*1.25),selY-path-(selSize*.75),selSize/2,selColor);
+    let rightPath = designFireworkPixel(selX+path+(selSize*1.5),selY+(selSize/4),selSize/2,selColor);
+    let bottomRightPath = designFireworkPixel(selX+path+(selSize*1.25),selY+path+(selSize*1.25),selSize/2,selColor);
+    let bottomPath = designFireworkPixel(selX+(selSize/4),selY+path+(selSize*1.5),selSize/2,selColor);
+    let bottomleftPath = designFireworkPixel(selX-path-(selSize*.75),selY+path+(selSize*1.25),selSize/2,selColor);
+    let leftPath = designFireworkPixel(selX-path-selSize,selY+(selSize/4),selSize/2,selColor);
+    let topLeftPath = designFireworkPixel(selX-path-(selSize*.75),selY-path-(selSize*.75),selSize/2,selColor);
 }
 
-//create
-function drawFireworks(ffx,ffy,ffs,fcolor){
-    drawFirework(ffx,ffy-ffs,ffs, fcolor); //draw center
-    drawFirework(ffx+(ffs/4),ffy-path-(2*ffs),ffs/2, fcolor); //draw top path
-    drawFirework(ffx+path+(ffs*1.25),ffy-path-(ffs*1.75),ffs/2,fcolor); //draw top-right path
-    drawFirework(ffx+path+(ffs*1.5),ffy-(3*ffs/4),ffs/2,fcolor); //draw right path
-    drawFirework(ffx+path+(ffs*1.25),ffy+path+(ffs/4),ffs/2,fcolor); //draw bottom-right path
-    drawFirework(ffx+(ffs/4),ffy+path+(ffs/2),ffs/2,fcolor); //draw down path
-    drawFirework(ffx-path-(3*ffs/4),ffy+path+(ffs/4),ffs/2,fcolor);  //draw bottom-left path
-    drawFirework(ffx-path-ffs,ffy-(3*ffs/4),ffs/2,fcolor); //draw left path
-    drawFirework(ffx-path-(3*ffs/4),ffy-path-(ffs*1.75),ffs/2,fcolor); //draw top-left path 
-}
-
-//create fireworks
-function explode() {
-
-    //control time between iterations below
+function createFireworks() {
     setTimeout(function(){
-        
-        //draw pixels across incrementing positions
-        if (path < size*length) {
-            drawFireworks(x,y,size,getRandomColor())
-            
-            //add firework's values to array
-            pastExplosions.push([x,y,size])   
-            
-            //increment positions
-            path += size;
-
-            explode()
+        if (path < randomSize*length) {
+            designFirework(randomX,randomY,randomSize,getRandomColor())
+            pastExplosions.push([randomX,randomY,randomSize])   
+            path += randomSize;
+            createFireworks()
         }
-
-        //control number of fireworks for every execution
         else if (explosionsLimit>1) {
-            
-            //reset values
             path = 1
-            x = Math.floor(Math.random()*canvas.width)
-            y = Math.floor(Math.random()*canvas.height)
-            size = Math.floor(Math.random()*(maxSize-minSize)+minSize)
-            
+            randomX = Math.floor(Math.random()*canvas.width)
+            randomY = Math.floor(Math.random()*canvas.height)
+            randomSize = Math.floor(Math.random()*(maxSize-minSize)+minSize)
             console.log(pastExplosions[pastExplosions.length-1])
-
             explosionsLimit--
-
-            explode(); 
+            createFireworks(); 
             fadeFireworks()
         }  
         else {
-            //reset values
             path = 1
-            x = Math.floor(Math.random()*canvas.width)
-            y = Math.floor(Math.random()*canvas.height)
-            size = Math.floor(Math.random()*(maxSize-minSize)+minSize)
+            randomX = Math.floor(Math.random()*canvas.width)
+            randomY = Math.floor(Math.random()*canvas.height)
+            randomSize = Math.floor(Math.random()*(maxSize-minSize)+minSize)
             explosionsLimit = 6
-
             fadeFireworks()
         }
-    }, 150);
+    }, rateOfExpansion);
 }
 
-//remove fireworks
 function fadeFireworks() {
+    ctx.fillStyle = sky;
+    ctx.fillRect(0,0,canvas.width,canvas.height); 
+    /*
     let pastExplosion = pastExplosions[0]
     let oldX = pastExplosion[0]
     let oldY = pastExplosion[1]
     let oldSize = pastExplosion[2]
-        
     if (path < oldSize*length) {
-        drawFireworks(oldX, oldY, oldSize,sky)  
+        designFirework(oldX, oldY, oldSize,sky)  
         path += oldSize;            
         fadeFireworks();
     }
     else{    
-        //reset values
         path = 1
-        
-        //remove first item from array
         pastExplosions.shift()
-        
         fadeFireworks();
-        
     }
-}
-
-//return random color
-function getRandomColor() {
-    let letters = '0123456789ABCDEF';
-    let color = '#';
-    for (let i = 0; i < 6; i++) {
-      color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
+    */
 }
