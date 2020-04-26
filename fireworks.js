@@ -1,94 +1,94 @@
+//Bind program executor to spacebar
+document.body.onkeyup = function(e){
+    if (e.keyCode == 32){
+        createFireworks()
+    }
+}
+
+//Create empty canvas
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
-document.getElementById('button').style.backgroundColor = "red";
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight
 
-//ANOTHER CHANGE
+//Draw sky
+let sky = '#2F69C6';
+ctx.fillStyle = sky;
+ctx.fillRect(0,0,canvas.width,canvas.height); 
 
-// stats
-let height = window.innerHeight;
-let width = window.innerWidth;
-let box = 25;
-canvas.width = width;
-canvas.height = height;
-let boxX = width/2-box/2;
-let boxY = height-box;
-let K = 1;
-let fireworks = [];
+//Define firework parameters
+let minSize = 5
+let maxSize = 25
+let randomX = Math.floor(Math.random()*canvas.width)
+let randomY = Math.floor(Math.random()*canvas.height)
+let randomSize = Math.floor(Math.random()*(maxSize-minSize)+minSize)
+let position = 1
+let explosionsLimit = 6
+let length = 8
+let rateOfExpansion = 120
+let colors = ['#87fab3', '#fa87ce', '#fab387', '#faed87', '#fa8795', '#cefa87', '#87faed', '#8795fa', '#87cefa'];
+// let pastExplosions = []
 
-// draw rectangle
-function drawRect(x,y,w,h,color) {
-	ctx.fillStyle = color;
-	ctx.fillRect(x,y,w,h);
+function getRandomColor() {return colors[Math.floor(Math.random()*(colors.length-1))]}
+
+function designFireworkPixel(x,y,size,color) {
+        ctx.fillStyle = color;
+        ctx.fillRect(x,y,size,size)
 }
 
-// delete trail
-function deleteTrail() {
-	boxY = height-box;
-	for(boxY; boxY > height/2-box; boxY-=box) {
-		drawRect(boxX,boxY,box,box,"black");
-	}
+function designFirework(x,y,size,color){
+    let center = designFireworkPixel(x,y,size,color);
+    let topPath = designFireworkPixel(x+(size/4),y-position-size,size/2,color);
+    let topRightPath = designFireworkPixel(x+position+(size*1.25),y-position-(size*.75),size/2,color);
+    let rightPath = designFireworkPixel(x+position+(size*1.5),y+(size/4),size/2,color);
+    let bottomRightPath = designFireworkPixel(x+position+(size*1.25),y+position+(size*1.25),size/2,color);
+    let bottomPath = designFireworkPixel(x+(size/4),y+position+(size*1.5),size/2,color);
+    let bottomleftPath = designFireworkPixel(x-position-(size*.75),y+position+(size*1.25),size/2,color);
+    let leftPath = designFireworkPixel(x-position-size,y+(size/4),size/2,color);
+    let topLeftPath = designFireworkPixel(x-position-(size*.75),y-position-(size*.75),size/2,color);
 }
 
-// launch
-function launch() {
-	setTimeout(function() {
-		if (boxY > height/2-box) {
-			drawRect(boxX-box/2,boxY,2*box,box,"black");
-			drawRect(boxX,boxY-box,box,box,"red");
-			drawRect(boxX+box/4,boxY,box/2,box/2,"orange");
-			boxY = boxY - box;
-			console.log(boxY);
-			launch();
-		} else {
-			deleteTrail();
-			explode(boxX,boxY,box);
-		}
-	}, 100);
+function createFireworks() {
+    setTimeout(function(){
+        if (position < randomSize * length) {
+            designFirework(randomX,randomY,randomSize,getRandomColor())
+            // pastExplosions.push([randomX,randomY,randomSize])   
+            position += randomSize;
+            createFireworks()
+        } else {
+            position = 1
+            randomX = Math.floor(Math.random()*canvas.width)
+            randomY = Math.floor(Math.random()*canvas.height)
+            randomSize = Math.floor(Math.random()*(maxSize-minSize)+minSize)
+            if (explosionsLimit > 1) {
+                // console.log(pastExplosions[pastExplosions.length-1])
+                explosionsLimit--
+                createFireworks(); 
+            } else {
+                explosionsLimit = 6
+            }
+            fadeFireworks()
+        }
+    }, rateOfExpansion);
 }
 
-// explode
-function explode(X,Y,B,) {
-	setTimeout(function() {
-		if (K<9) {
-			// draw new boxes
-			//drawRect(boxX,boxY,box,box,"black");
-			//drawRect(344-K*18,boxY+K*box,box/2,box/2,"orange");
-			//colors[] = (color === 'black') ? 'black' : 'orange';
-			drawRect(X-B/2-(K-1)*B,Y+K*B,B/2,B/2,"orange");
-			//drawRect(344-K*18,boxY+12-K*box,box/2,box/2,"yellow");
-			drawRect(X-B/2-(K-1)*B,Y-.5*B-(K-1)*B,B/2,B/2,"yellow");
-			//drawRect(344+K*18,boxY+12-K*box,box/2,box/2,"green");
-			drawRect(X+K*B,Y-B/2-(K-1)*B,B/2,B/2,"green");
-			//drawRect(344+K*18,boxY+K*box,box/2,box/2,"white");
-			drawRect(X+K*B,Y+K*B,B/2,B/2,"white");
-			//drawRect(344-K*box,boxY+6,box/2,box/2,"pink");
-			drawRect(X-K*B,Y+B/4,B/2,B/2,"pink");
-			//drawRect(344+K*box,boxY+6,box/2,box/2,"red");
-			drawRect(X+B/2+K*B,Y+B/4,B/2,B/2,"red");
-			// drawRect(344,boxY-K*box,box/2,box/2,"purple");
-			drawRect(X+B/4,Y-K*B,B/2,B/2,"purple");
-			//drawRect(344,boxY+12+K*box,box/2,box/2,"white");
-			drawRect(X+B/4,Y+B/2+K*B,B/2,B/2,"white");
-			K++;
-			explode(X,Y,B);
-		} else {
-			//fireworks.push([X,Y,B]);
-			//deleteFireworks(fireworks);
-			K = 1;
-			X = Math.floor(Math.random()*width);
-			Y = Math.floor(Math.random()*height);
-			B = Math.floor(Math.random()*box)
-			explode(X,Y,B);
-		}
-	}, 100);
+function fadeFireworks() {
+    ctx.fillStyle = sky;
+    ctx.fillRect(0,0,canvas.width,canvas.height); 
+    /*
+    let pastExplosion = pastExplosions[0]
+    let oldX = pastExplosion[0]
+    let oldY = pastExplosion[1]
+    let oldSize = pastExplosion[2]
+    if (position < oldSize*length) {
+        designFirework(oldX, oldY, oldSize,sky)  
+        position += oldSize;            
+        fadeFireworks();
+    }
+    else{    
+        position = 1
+        pastExplosions.shift()
+        fadeFireworks();
+    }
+    */
 }
-
-/*function deleteFireworks(fworks) {
-	if (fworks.length > 5) {
-	}
-}*/
-
-let button = document.getElementById('button');
-button.addEventListener('click', launch);
-drawRect(0,0,width,height,"black");
-drawRect(boxX,height-box,box,box,"red");
